@@ -1,5 +1,5 @@
 [project]
-name = "dlq-reprocess"
+name = "gundi-dlq"
 version = "0.1.0"
 description = "Utility to re-process messages from Gundi dead-letter queues"
 authors = [
@@ -16,7 +16,7 @@ dependencies = [
     "click (>=8.1.8,<9.0.0)"
 ]
 [tool.poetry.scripts]
-dlq-reprocess = "dlq_reprocess:main"
+gundi-dlq = "gundi_dlq:main"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
