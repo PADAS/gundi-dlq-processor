@@ -116,8 +116,8 @@ async def main_async(
 
 
 @click.command()
-@click.option('--from-sub',  help="Subscription (id) to pull messages from")
-@click.option('--to-topic', help="Topic (id) to publish messages to")
+@click.option('--from-sub', required=True,  help="Subscription (id) to pull messages from")
+@click.option('--to-topic', required=True, help="Topic (id) to publish messages to")
 @click.option('--project', default='cdip-prod1-78ca', help="GCP Project ID")
 @click.option('--continue', 'cont', is_flag=True, default=False, help="Continue processing messages until interrupted")
 @click.option('--purge', is_flag=True, default=False, help="Purge messages from the source subscription")
