@@ -89,7 +89,7 @@ async def process_messages(
 
 
 async def main_async(
-        from_sub, to_topic, project, cont=False, purge=False, msg_type=None, msg_type_exclude=None,
+        from_sub, to_topic, project, cont=False, reprocess=True, purge=False, msg_type=None, msg_type_exclude=None,
         connection=None, system_id=None, gundi_id=None, source_id=None
 ):
     subscription_path = f"projects/{project}/subscriptions/{from_sub}"
@@ -120,6 +120,7 @@ async def main_async(
 @click.option('--to-topic', required=True, help="Topic (id) to publish messages to")
 @click.option('--project', default='cdip-prod1-78ca', help="GCP Project ID")
 @click.option('--continue', 'cont', is_flag=True, default=False, help="Continue processing messages until interrupted")
+@click.option('--reprocess', is_flag=True, default=True, help="Reprocess messages from the source subscription")
 @click.option('--purge', is_flag=True, default=False, help="Purge messages from the source subscription")
 @click.option('--msg-type', multiple=True, help="Message types to include in reprocessing.")
 @click.option('--msg-type-exclude', multiple=True, help="Message types to exclude from reprocessing.")
@@ -128,12 +129,15 @@ async def main_async(
 @click.option('--gundi-id', help="Gundi ID to filter messages by")
 @click.option('--source-id', help="Source ID to filter messages by")
 def main(
-        from_sub, to_topic, project, cont, purge,
+        from_sub, to_topic, project, cont, reprocess, purge,
         msg_type, msg_type_exclude, connection, system_id, gundi_id, source_id
 ):
+    if reprocess and purge:
+        print("Cannot use --reprocess and --purge together")
+        exit(1)
     asyncio.run(
         main_async(
-            from_sub, to_topic, project, cont, purge,
+            from_sub, to_topic, project, cont, reprocess, purge,
             msg_type, msg_type_exclude, connection, system_id, gundi_id, source_id
         )
     )
