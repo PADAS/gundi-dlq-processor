@@ -117,10 +117,10 @@ async def main_async(
 
 @click.command()
 @click.option('--from-sub', required=True,  help="Subscription (id) to pull messages from")
-@click.option('--to-topic', required=True, help="Topic (id) to publish messages to")
+@click.option('--to-topic', required=False, help="Topic (id) to publish messages to")
 @click.option('--project', default='cdip-prod1-78ca', help="GCP Project ID")
 @click.option('--continue', 'cont', is_flag=True, default=False, help="Continue processing messages until interrupted")
-@click.option('--reprocess', is_flag=True, default=True, help="Reprocess messages from the source subscription")
+@click.option('--reprocess', is_flag=True, help="Reprocess messages from the source subscription")
 @click.option('--purge', is_flag=True, default=False, help="Purge messages from the source subscription")
 @click.option('--msg-type', multiple=True, help="Message types to include in reprocessing.")
 @click.option('--msg-type-exclude', multiple=True, help="Message types to exclude from reprocessing.")
@@ -134,6 +134,12 @@ def main(
 ):
     if reprocess and purge:
         print("Cannot use --reprocess and --purge together")
+        exit(1)
+    if not reprocess and not purge:
+        print("Must use either --reprocess or --purge")
+        exit(1)
+    if reprocess and not to_topic:
+        print("Must provide a target topic with --reprocess")
         exit(1)
     asyncio.run(
         main_async(
