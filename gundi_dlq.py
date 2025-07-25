@@ -19,6 +19,8 @@ async def process_messages(
         print("Exiting..")
         exit(0)
     # Pulls messages from a given subscription, publishes them to another topic, and acknowledges them.
+    total_messages_acknowledged = 0
+    total_messages_processed = 0
     while True:
         print(f"Pulling messages from {subscription_path}...")
         received_messages = await subscriber_client.pull(subscription_path, max_messages=batch_size)
@@ -34,7 +36,7 @@ async def process_messages(
             msg_source_id = attributes.get("source_id") or decoded_message.get("payload", {}).get("external_source_id")
             msg_system_event_id = decoded_message.get("event_id")
             message_event_type = decoded_message.get("event_type")
-            print(f"Reprocessing message:{message_event_type} (gundi_id {msg_gundi_id}, system_id {system_id}) - Connection {connection_id}")
+            print(f"Reprocessing message:{message_event_type} (gundi_id {msg_gundi_id}, system_id {msg_system_event_id}) - Connection {connection_id}")
             # Filter messages
             if system_id and system_id != msg_system_event_id:
                 print(f"Message {message_event_type} (system_id {system_id}) excluded. Left in queue.")
@@ -81,7 +83,10 @@ async def process_messages(
             # Acknowledges the processed messages
             await subscriber_client.acknowledge(subscription_path, ack_ids)
 
-        print(f"{len(ack_ids)}/{message_count} messages reprocessed.")
+        total_messages_acknowledged += len(ack_ids)
+        total_messages_processed += message_count
+        print(f"Total acknowledged/processed: ({total_messages_acknowledged}/{total_messages_processed}). This batch: ({len(ack_ids)}/{message_count})")
+
         # Ask the user if want to continue when not more messages are found, read user input [y/n]
         if len(ack_ids) == 0 and not cont and input(f"Continue? [y/n]: ").strip().lower() == 'n':
             print("Exiting..")
