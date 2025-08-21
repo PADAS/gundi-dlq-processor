@@ -13,18 +13,22 @@ async def publish_messages(publisher_client: PublisherClient, topic_path, messag
 async def process_messages(
         subscriber_client, publisher_client, subscription_path, target_topic_path,
         cont=False, purge=False, msg_type=None, msg_type_exclude=None,
-        connection=None, system_id=None, gundi_id=None, source_id=None
+        connection=None, system_id=None, gundi_id=None, source_id=None, batch_size=100
 ):
     if purge and input(f"Using --purge may cause data loss, are you sure? [y/n]: ").strip().lower() != 'y':
         print("Exiting..")
         exit(0)
     # Pulls messages from a given subscription, publishes them to another topic, and acknowledges them.
+    total_messages_acknowledged = 0
+    total_messages_processed = 0
     while True:
         print(f"Pulling messages from {subscription_path}...")
-        received_messages = await subscriber_client.pull(subscription_path, max_messages=100)
+        received_messages = await subscriber_client.pull(subscription_path, max_messages=batch_size)
         filtered_messages = []
         ack_ids = []
+        message_count = 0
         for received_message in received_messages:
+            message_count += 1
             decoded_message = json.loads(received_message.data.decode("utf-8"))
             attributes = received_message.attributes
             connection_id = attributes.get("data_provider_id")
@@ -32,7 +36,7 @@ async def process_messages(
             msg_source_id = attributes.get("source_id") or decoded_message.get("payload", {}).get("external_source_id")
             msg_system_event_id = decoded_message.get("event_id")
             message_event_type = decoded_message.get("event_type")
-            print(f"Reprocessing message:{message_event_type} (gundi_id {msg_gundi_id}, system_id {system_id}) - Connection {connection_id}")
+            print(f"Reprocessing message:{message_event_type} (gundi_id {msg_gundi_id}, system_id {msg_system_event_id}) - Connection {connection_id}")
             # Filter messages
             if system_id and system_id != msg_system_event_id:
                 print(f"Message {message_event_type} (system_id {system_id}) excluded. Left in queue.")
@@ -79,7 +83,10 @@ async def process_messages(
             # Acknowledges the processed messages
             await subscriber_client.acknowledge(subscription_path, ack_ids)
 
-        print(f"{len(ack_ids)} messages reprocessed.")
+        total_messages_acknowledged += len(ack_ids)
+        total_messages_processed += message_count
+        print(f"Total acknowledged/processed: ({total_messages_acknowledged}/{total_messages_processed}). This batch: ({len(ack_ids)}/{message_count})")
+
         # Ask the user if want to continue when not more messages are found, read user input [y/n]
         if len(ack_ids) == 0 and not cont and input(f"Continue? [y/n]: ").strip().lower() == 'n':
             print("Exiting..")
@@ -90,7 +97,7 @@ async def process_messages(
 
 async def main_async(
         from_sub, to_topic, project, cont=False, reprocess=True, purge=False, msg_type=None, msg_type_exclude=None,
-        connection=None, system_id=None, gundi_id=None, source_id=None
+        connection=None, system_id=None, gundi_id=None, source_id=None, batch_size=100
 ):
     subscription_path = f"projects/{project}/subscriptions/{from_sub}"
     target_topic_path = f"projects/{project}/topics/{to_topic}"
@@ -109,7 +116,8 @@ async def main_async(
                     connection=connection,
                     system_id=system_id,
                     gundi_id=gundi_id,
-                    source_id=source_id
+                    source_id=source_id,
+                    batch_size=batch_size
                 )
         except Exception as e:
             print(f"An error occurred: {e}. Restarting..")
@@ -128,9 +136,10 @@ async def main_async(
 @click.option('--system-id', help="System Event ID to filter messages by")
 @click.option('--gundi-id', help="Gundi ID to filter messages by")
 @click.option('--source-id', help="Source ID to filter messages by")
+@click.option('--batch-size', default=100, type=int, help="Number of messages to pull per batch iteration (default: 100)")
 def main(
         from_sub, to_topic, project, cont, reprocess, purge,
-        msg_type, msg_type_exclude, connection, system_id, gundi_id, source_id
+        msg_type, msg_type_exclude, connection, system_id, gundi_id, source_id, batch_size
 ):
     if reprocess and purge:
         print("Cannot use --reprocess and --purge together")
@@ -144,7 +153,7 @@ def main(
     asyncio.run(
         main_async(
             from_sub, to_topic, project, cont, reprocess, purge,
-            msg_type, msg_type_exclude, connection, system_id, gundi_id, source_id
+            msg_type, msg_type_exclude, connection, system_id, gundi_id, source_id, batch_size
         )
     )
 
