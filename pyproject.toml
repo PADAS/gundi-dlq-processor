@@ -1,6 +1,6 @@
 [project]
 name = "gundi-dlq"
-version = "0.2.0"
+version = "0.2.1"
 description = "Utility to re-process messages from Gundi dead-letter queues"
 authors = [
     {name = "Mariano Martinez Grasso",email = "marianomartinez84@gmail.com"}

@@ -120,7 +120,7 @@ async def main_async(
                     batch_size=batch_size
                 )
         except Exception as e:
-            print(f"An error occurred: {e}. Restarting..")
+            print(f"An error occurred: {type(e).__name__} {e}. Restarting..")
 
 
 @click.command()
