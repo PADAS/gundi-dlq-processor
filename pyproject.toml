@@ -1,30 +1,36 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel", "setuptools-scm>=8"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "gundi-dlq"
-version = "0.2.2"
+dynamic = ["version"]
 description = "Utility to re-process messages from Gundi dead-letter queues"
-authors = [
-    {name = "Mariano Martinez Grasso",email = "marianomartinez84@gmail.com"}
-]
-license = "Apache-2.0"
 readme = "README.md"
-packages = [
-    { include = "gundi_dlq_processor" }
+requires-python = ">=3.10"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Mariano Martinez Grasso", email = "marianomartinez84@gmail.com"}
 ]
-requires-python = ">=3.10,<4.0"
 dependencies = [
-    "gcloud-aio-pubsub (>=6.0.1,<7.0.0)",
-    "click (>=8.1.8,<9.0.0)",
-    "google-api-core (>=2.0.0,<3.0.0)"
+    "gcloud-aio-pubsub>=6.0.1,<7.0",
+    "click>=8.1.8,<9.0",
+    "google-api-core>=2.0.0,<3.0",
 ]
-[tool.poetry.scripts]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "ruff",
+]
+docs = [
+    "mkdocs-material>=9.5,<10.0",
+]
+
+[project.scripts]
 gundi-dlq = "gundi_dlq:main"
 
-[tool.poetry.group.docs]
-optional = true
+[tool.setuptools]
+py-modules = ["gundi_dlq"]
 
-[tool.poetry.group.docs.dependencies]
-mkdocs-material = ">=9.5,<10.0"
-
-[build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
-build-backend = "poetry.core.masonry.api"
+[tool.setuptools_scm]

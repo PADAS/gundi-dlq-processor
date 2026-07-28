@@ -198,7 +198,7 @@ succeeding, age limit covering the drain time), replay the dead-lettered
 messages back through the dispatcher's input topic:
 
 ```bash
-poetry run python gundi_dlq.py \
+gundi-dlq \
   --from-sub observations-dead-letter-sub \
   --to-topic <site>-earthran-<hash>-topic \
   --reprocess \

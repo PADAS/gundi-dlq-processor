@@ -39,4 +39,5 @@ Typical symptoms:
   access to Cloud Run and Cloud Monitoring).
 - `gcloud` CLI authenticated: `gcloud auth login` and
   `gcloud auth application-default login`.
-- This repo cloned, with dependencies installed (`poetry install`).
+- The tool installed: `pip install gundi-dlq` (or clone this repo and
+  `pip install -e .`).
