@@ -123,7 +123,10 @@ async def main_async(
                 )
         except google_exceptions.NotFound as e:
             print(f"❌ Resource not found: {e}")
-            print(f"   Please check that subscription '{from_sub}' and topic '{to_topic}' exist in project '{project}'")
+            if to_topic:
+                print(f"   Please check that subscription '{from_sub}' and topic '{to_topic}' exist in project '{project}'")
+            else:
+                print(f"   Please check that subscription '{from_sub}' exists in project '{project}'")
             print(f"   Verify your Google Cloud credentials and project permissions")
             sys.exit(1)
         except google_exceptions.PermissionDenied as e:
@@ -147,9 +150,6 @@ async def main_async(
             print(f"⚠️  Service temporarily unavailable: {e}")
             print(f"   Google Cloud Pub/Sub service is experiencing issues. Retrying...")
             await asyncio.sleep(5)
-        except KeyboardInterrupt:
-            print(f"\n🛑 Interrupted by user. Exiting gracefully...")
-            sys.exit(0)
         except json.JSONDecodeError as e:
             print(f"❌ JSON decode error: {e}")
             print(f"   A message in the queue contains malformed JSON. This might indicate data corruption.")
@@ -195,12 +195,16 @@ def main(
     if reprocess and not to_topic:
         print("Must provide a target topic with --reprocess")
         exit(1)
-    asyncio.run(
-        main_async(
-            from_sub, to_topic, project, cont, reprocess, purge,
-            msg_type, msg_type_exclude, connection, system_id, gundi_id, source_id, batch_size
+    try:
+        asyncio.run(
+            main_async(
+                from_sub, to_topic, project, cont, reprocess, purge,
+                msg_type, msg_type_exclude, connection, system_id, gundi_id, source_id, batch_size
+            )
         )
-    )
+    except KeyboardInterrupt:
+        print(f"\n🛑 Interrupted by user. Exiting gracefully...")
+        sys.exit(0)
 
 
 if __name__ == '__main__':
