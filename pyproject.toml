@@ -1,6 +1,6 @@
 [project]
 name = "gundi-dlq"
-version = "0.2.1"
+version = "0.2.2"
 description = "Utility to re-process messages from Gundi dead-letter queues"
 authors = [
     {name = "Mariano Martinez Grasso",email = "marianomartinez84@gmail.com"}
@@ -13,7 +13,8 @@ packages = [
 requires-python = ">=3.10,<4.0"
 dependencies = [
     "gcloud-aio-pubsub (>=6.0.1,<7.0.0)",
-    "click (>=8.1.8,<9.0.0)"
+    "click (>=8.1.8,<9.0.0)",
+    "google-api-core (>=2.0.0,<3.0.0)"
 ]
 [tool.poetry.scripts]
 gundi-dlq = "gundi_dlq:main"

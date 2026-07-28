@@ -1,8 +1,10 @@
 import asyncio
 import json
+import sys
 
 import click
 from gcloud.aio.pubsub import SubscriberClient, PublisherClient, PubsubMessage
+from google.api_core import exceptions as google_exceptions
 
 
 async def publish_messages(publisher_client: PublisherClient, topic_path, messages):
@@ -119,8 +121,51 @@ async def main_async(
                     source_id=source_id,
                     batch_size=batch_size
                 )
+        except google_exceptions.NotFound as e:
+            print(f"❌ Resource not found: {e}")
+            if to_topic:
+                print(f"   Please check that subscription '{from_sub}' and topic '{to_topic}' exist in project '{project}'")
+            else:
+                print(f"   Please check that subscription '{from_sub}' exists in project '{project}'")
+            print(f"   Verify your Google Cloud credentials and project permissions")
+            sys.exit(1)
+        except google_exceptions.PermissionDenied as e:
+            print(f"❌ Permission denied: {e}")
+            print(f"   Please check that you have the necessary permissions to access Pub/Sub resources")
+            print(f"   Required roles: Pub/Sub Subscriber, Pub/Sub Publisher")
+            sys.exit(1)
+        except google_exceptions.Unauthenticated as e:
+            print(f"❌ Authentication failed: {e}")
+            print(f"   Please run 'gcloud auth application-default login' to authenticate")
+            sys.exit(1)
+        except google_exceptions.DeadlineExceeded as e:
+            print(f"⚠️  Request timeout: {e}")
+            print(f"   This might be due to network issues or high latency. Retrying...")
+            await asyncio.sleep(5)  # Wait longer before retry
+        except google_exceptions.ResourceExhausted as e:
+            print(f"⚠️  Resource exhausted: {e}")
+            print(f"   This might be due to quota limits. Retrying with delay...")
+            await asyncio.sleep(10)  # Wait longer for quota reset
+        except google_exceptions.ServiceUnavailable as e:
+            print(f"⚠️  Service temporarily unavailable: {e}")
+            print(f"   Google Cloud Pub/Sub service is experiencing issues. Retrying...")
+            await asyncio.sleep(5)
+        except json.JSONDecodeError as e:
+            print(f"❌ JSON decode error: {e}")
+            print(f"   A message in the queue contains malformed JSON. This might indicate data corruption.")
+            print(f"   Consider purging problematic messages or contacting the data source.")
+            sys.exit(1)
+        except UnicodeDecodeError as e:
+            print(f"❌ Unicode decode error: {e}")
+            print(f"   A message in the queue contains invalid UTF-8 data.")
+            print(f"   Consider purging problematic messages or contacting the data source.")
+            sys.exit(1)
         except Exception as e:
-            print(f"An error occurred: {type(e).__name__} {e}. Restarting..")
+            print(f"❌ Unexpected error: {e}")
+            print(f"   Error type: {type(e).__name__}")
+            print(f"   This is an unexpected error. Please check the logs and contact support if needed.")
+            print(f"   Restarting in 5 seconds...")
+            await asyncio.sleep(5)
 
 
 @click.command()
@@ -150,12 +195,16 @@ def main(
     if reprocess and not to_topic:
         print("Must provide a target topic with --reprocess")
         exit(1)
-    asyncio.run(
-        main_async(
-            from_sub, to_topic, project, cont, reprocess, purge,
-            msg_type, msg_type_exclude, connection, system_id, gundi_id, source_id, batch_size
+    try:
+        asyncio.run(
+            main_async(
+                from_sub, to_topic, project, cont, reprocess, purge,
+                msg_type, msg_type_exclude, connection, system_id, gundi_id, source_id, batch_size
+            )
         )
-    )
+    except KeyboardInterrupt:
+        print(f"\n🛑 Interrupted by user. Exiting gracefully...")
+        sys.exit(0)
 
 
 if __name__ == '__main__':
