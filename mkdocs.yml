@@ -1,0 +1,42 @@
+site_name: Gundi DLQ Processor
+site_description: Operational runbook and tooling for recovering dead-lettered messages in Gundi
+site_url: https://padas.github.io/gundi-dlq-processor/
+repo_url: https://github.com/PADAS/gundi-dlq-processor
+repo_name: PADAS/gundi-dlq-processor
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.sections
+    - navigation.top
+    - content.code.copy
+    - toc.follow
+
+markdown_extensions:
+  - admonition
+  - toc:
+      permalink: true
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - pymdownx.details
+
+exclude_docs: |
+  superpowers/
+
+nav:
+  - Home: index.md
+  - Troubleshooting Runbook: runbook.md
+  - Reprocessing Reference: reprocessing.md
