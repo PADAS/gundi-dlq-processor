@@ -7,9 +7,7 @@ republishes them to a target topic (**reprocess**) or discards them
 ## Setup
 
 ```bash
-git clone https://github.com/PADAS/gundi-dlq-processor
-cd gundi-dlq-processor
-poetry install
+pip install gundi-dlq
 gcloud auth application-default login
 ```
 
@@ -19,7 +17,7 @@ on the target topic.
 ## Reprocess
 
 ```bash
-poetry run python gundi_dlq.py \
+gundi-dlq \
   --from-sub <dead-letter-subscription-id> \
   --to-topic <target-topic-id> \
   --project <gcp-project-id> \
@@ -37,7 +35,7 @@ dispatcher's age check — provided the dispatcher can deliver them within
 ## Purge
 
 ```bash
-poetry run python gundi_dlq.py \
+gundi-dlq \
   --from-sub <dead-letter-subscription-id> \
   --project <gcp-project-id> \
   --purge \

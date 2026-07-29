@@ -23,15 +23,13 @@ The tool includes filtering capabilities to selectively process messages based o
 ## Installation
 
 ```bash
-# Clone the repository
+# Install from PyPI
+pip install gundi-dlq
+
+# Or install from source
 git clone <repository-url>
 cd gundi-dlq-processor
-
-# Install dependencies (if using Poetry)
-poetry install
-
-# Or install with pip
-pip install -r requirements.txt
+pip install -e .
 ```
 
 ## Usage
@@ -40,13 +38,13 @@ pip install -r requirements.txt
 
 ```bash
 # Reprocess messages from DLQ to a target topic
-python gundi_dlq.py --from-sub <subscription-id> --reprocess --to-topic <topic-id>
+gundi-dlq --from-sub <subscription-id> --reprocess --to-topic <topic-id>
 
 # Purge messages from DLQ (with confirmation)
-python gundi_dlq.py --from-sub <subscription-id> --purge
+gundi-dlq --from-sub <subscription-id> --purge
 
 # Process with custom batch size
-python gundi_dlq.py --from-sub <subscription-id> --reprocess --to-topic <topic-id> --batch-size 50
+gundi-dlq --from-sub <subscription-id> --reprocess --to-topic <topic-id> --batch-size 50
 ```
 
 ### Command Line Options
@@ -73,37 +71,37 @@ python gundi_dlq.py --from-sub <subscription-id> --reprocess --to-topic <topic-i
 
 #### Reprocess all messages from a DLQ
 ```bash
-python gundi_dlq.py --from-sub my-dlq-subscription --reprocess --to-topic my-target-topic
+gundi-dlq --from-sub my-dlq-subscription --reprocess --to-topic my-target-topic
 ```
 
 #### Purge all messages from a DLQ
 ```bash
-python gundi_dlq.py --from-sub my-dlq-subscription --purge
+gundi-dlq --from-sub my-dlq-subscription --purge
 ```
 
 #### Reprocess only specific message types
 ```bash
-python gundi_dlq.py --from-sub my-dlq-subscription --reprocess --to-topic my-target-topic --msg-type observation --msg-type alert
+gundi-dlq --from-sub my-dlq-subscription --reprocess --to-topic my-target-topic --msg-type observation --msg-type alert
 ```
 
 #### Exclude specific message types
 ```bash
-python gundi_dlq.py --from-sub my-dlq-subscription --reprocess --to-topic my-target-topic --msg-type-exclude error --msg-type-exclude debug
+gundi-dlq --from-sub my-dlq-subscription --reprocess --to-topic my-target-topic --msg-type-exclude error --msg-type-exclude debug
 ```
 
 #### Filter by connection ID
 ```bash
-python gundi_dlq.py --from-sub my-dlq-subscription --reprocess --to-topic my-target-topic --connection connection-123
+gundi-dlq --from-sub my-dlq-subscription --reprocess --to-topic my-target-topic --connection connection-123
 ```
 
 #### Filter by multiple criteria
 ```bash
-python gundi_dlq.py --from-sub my-dlq-subscription --reprocess --to-topic my-target-topic --gundi-id gundi-456 --source-id source-789 --batch-size 50
+gundi-dlq --from-sub my-dlq-subscription --reprocess --to-topic my-target-topic --gundi-id gundi-456 --source-id source-789 --batch-size 50
 ```
 
 #### Continuous processing
 ```bash
-python gundi_dlq.py --from-sub my-dlq-subscription --reprocess --to-topic my-target-topic --continue
+gundi-dlq --from-sub my-dlq-subscription --reprocess --to-topic my-target-topic --continue
 ```
 
 ## Message Filtering
