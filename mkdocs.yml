@@ -39,4 +39,5 @@ exclude_docs: |
 nav:
   - Home: index.md
   - Troubleshooting Runbook: runbook.md
+  - "Runbook: Data Never Delivered": undelivered-data.md
   - Reprocessing Reference: reprocessing.md

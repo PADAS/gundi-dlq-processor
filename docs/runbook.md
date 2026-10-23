@@ -26,17 +26,29 @@ land in **different places**:
     > sent to dead-letter queue.
 
     The EarthRanger dispatcher checks the Pub/Sub **publish time** of each
-    incoming message against `MAX_EVENT_AGE_SECONDS` (default 43200 = 12
-    hours). Anything older is rejected and published to a dead-letter topic.
+    incoming message against `MAX_EVENT_AGE_SECONDS`. Anything older is
+    rejected and published to a dead-letter topic. The value is set per
+    dispatcher service and varies a lot: the code default is 86400 (24
+    hours), and some deployments use 43200 or 3600. Read it from the service
+    you are investigating.
 
 !!! danger "The topic name is not what you expect"
     The ER dispatcher's `DEAD_LETTER_TOPIC` environment variable is **not**
-    where observations go. Observations are published to the
-    **observations dead-letter topic** (e.g. `observations-dead-letter`),
-    with its own subscription (e.g. `observations-dead-letter-sub`). If you
-    pull from the dispatchers' dead-letter subscription and find nothing,
-    this is why. Confirm by reading the dispatcher's logs (step 4) — it logs
-    the exact topic it publishes to.
+    where v2 messages go. It is only used for v1 messages. v2 messages go to
+    a dead-letter topic chosen by the message's `stream_type`, each with its
+    own subscription:
+
+    | v2 stream type | Dead-letter topic (e.g.) | Subscription (e.g.) |
+    |---|---|---|
+    | Observations | `observations-dead-letter` | `observations-dead-letter-sub` |
+    | Events | `events-dead-letter` | `events-dead-letter-sub` |
+    | Event updates | `events-updates-dead-letter` | `events-updates-dead-letter-sub` |
+    | Attachments | `attachments-dead-letter` | `attachments-dead-letter-sub` |
+    | Text messages | `text-messages-dead-letter` | `text-messages-dead-letter-sub` |
+
+    If you pull from the dispatchers' dead-letter subscription and find
+    nothing, this is why. Confirm by reading the dispatcher's logs (step
+    4). It logs the exact topic it publishes to.
 
 ## 2. Read the Activity Log entry
 
