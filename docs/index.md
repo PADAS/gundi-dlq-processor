@@ -11,6 +11,10 @@ dead-letter queue (DLQ).
   dead-lettering actually works in Gundi, how to find where the messages
   went, how to diagnose why they failed, and how to fix the underlying
   problem before replaying anything.
+- **[Runbook: Data Never Delivered](undelivered-data.md)**: use this when a
+  provider's data reached Gundi but never arrived at the destination, even if
+  there is no dead-letter error, the connection looks healthy, or the
+  messages are in no queue at all.
 - **[Reprocessing Reference](reprocessing.md)** — how to use `gundi_dlq.py`
   to replay (or purge) dead-lettered messages once the underlying issue is
   fixed.
